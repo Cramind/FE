@@ -1,14 +1,14 @@
 <script setup>
-import StudyRoom from './pages/StudyRoom.vue'
+import CommonModalContainer from "@/components/container/CommonModalContainer.vue";
 </script>
 
 <template>
-
   <main>
-    <StudyRoom/>
+    <div class="main">
+      <router-view />
+      <CommonModalContainer />
+    </div>
   </main>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
