@@ -5,7 +5,7 @@ const baseUrl = "http://localhost:8080/api";
 // axios 인스턴스 생성
 const apiInstance = axios.create({
   baseURL: baseUrl,
-  withCredentials: true, // 쿠키 전송을 위해 필요
+  //withCredentials: true, // 쿠키 전송을 위해 필요
 });
 
 // 토큰 재발급 시도 중 여부 플래그
