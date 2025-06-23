@@ -503,6 +503,7 @@
 import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import UserInviteModal from "../components/UserInviteModal.vue";
 import { useModalStore } from "@/stores/modalStore";
+import { api } from "@/axios.js";
 
 const modalStore = useModalStore();
 
@@ -636,8 +637,9 @@ const formatTimestamp = (timestamp) => {
   });
 };
 
-const openUserInviteModal = () => {
-  modalStore.openModal(UserInviteModal);
+const openUserInviteModal = async () => {
+  const response = await api.$post("http://localhost:8080/roomusers/1/code");
+  console.log(response);
 };
 
 // 타이머 기능들
