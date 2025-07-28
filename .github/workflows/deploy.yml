@@ -19,13 +19,21 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy via SCP to EC2 (upload to tmp folder)
+      - name: Prepare frontend build folder (flatten dist/)
+        run: |
+          mkdir -p frontend-build
+          cp -r dist/* frontend-build/
+
+      - name: Check frontend-build contents
+        run: ls -al frontend-build
+
+      - name: Deploy via SCP to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_SERVER_HOST }}
           username: ${{ secrets.DEPLOY_SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "dist/."
+          source: "frontend-build/*"
           target: "~/frontend-temp"
 
       - name: SSH into EC2 and move files with sudo
