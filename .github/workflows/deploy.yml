@@ -33,7 +33,7 @@ jobs:
           host: ${{ secrets.DEPLOY_SERVER_HOST }}
           username: ${{ secrets.DEPLOY_SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "frontend-build/*"
+          source: "frontend-build/."
           target: "~/frontend-temp"
 
       - name: SSH into EC2 and move files with sudo
