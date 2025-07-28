@@ -19,11 +19,23 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy via SCP
+      - name: Deploy via SCP to EC2 (upload to tmp folder)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_SERVER_HOST }}
           username: ${{ secrets.DEPLOY_SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           source: "dist/*"
-          target: "/var/www/html/"
+          target: "~/frontend-temp"
+
+      - name: SSH into EC2 and move files with sudo
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.DEPLOY_SERVER_HOST }}
+          username: ${{ secrets.DEPLOY_SERVER_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            sudo mkdir -p /var/www/html
+            sudo rm -rf /var/www/html/*
+            sudo cp -r ~/frontend-temp/* /var/www/html/
+            rm -rf ~/frontend-temp
