@@ -2,7 +2,174 @@
   <div class="min-h-screen bg-gray-900 text-gray-100 flex font-sans">
     <!-- 사이드바 -->
     <div class="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
-      <!-- 저장소 정보 -->
+      <!-- 룸 선택 드롭다운 -->
+      <div class="p-4 border-b border-gray-700 bg-gray-850">
+        <div class="relative">
+          <button
+            @click="showRoomSelector = !showRoomSelector"
+            class="w-full flex items-center justify-between p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+              <div class="text-left">
+                <div class="font-semibold text-gray-100 text-sm">
+                  {{ currentRoom.name }}
+                </div>
+                <div class="text-xs text-gray-400">
+                  {{ currentRoom.members }}명 참여 중
+                </div>
+              </div>
+            </div>
+            <svg
+              class="w-4 h-4 text-gray-400 transition-transform duration-200"
+              :class="{ 'rotate-180': showRoomSelector }"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+
+          <!-- 룸 선택 드롭다운 메뉴 -->
+          <div
+            v-if="showRoomSelector"
+            class="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"
+          >
+            <!-- 내 룸들 -->
+            <div class="p-2">
+              <div
+                class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide"
+              >
+                내 스터디룸
+              </div>
+              <div
+                v-for="room in myRooms"
+                :key="room.id"
+                @click="switchRoom(room)"
+                class="flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg cursor-pointer transition-colors"
+                :class="{ 'bg-gray-700': room.id === currentRoom.id }"
+              >
+                <div class="relative">
+                  <div
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                    :style="{ backgroundColor: room.color }"
+                  >
+                    {{ room.name.charAt(0) }}
+                  </div>
+                  <div
+                    v-if="room.isActive"
+                    class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-800"
+                  ></div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-100 text-sm truncate">
+                    {{ room.name }}
+                  </div>
+                  <div class="text-xs text-gray-400">
+                    {{ room.members }}명 • {{ room.category }}
+                  </div>
+                </div>
+                <div
+                  v-if="room.hasNotification"
+                  class="w-2 h-2 bg-red-500 rounded-full"
+                ></div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-700"></div>
+
+            <!-- 추천 룸들 -->
+            <div class="p-2">
+              <div
+                class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide"
+              >
+                추천 스터디룸
+              </div>
+              <div
+                v-for="room in recommendedRooms"
+                :key="room.id"
+                @click="joinRoom(room)"
+                class="flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg cursor-pointer transition-colors"
+              >
+                <div
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                  :style="{ backgroundColor: room.color }"
+                >
+                  {{ room.name.charAt(0) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-100 text-sm truncate">
+                    {{ room.name }}
+                  </div>
+                  <div class="text-xs text-gray-400">
+                    {{ room.members }}명 • {{ room.category }}
+                  </div>
+                </div>
+                <button
+                  class="text-xs bg-blue-600 text-blue-100 px-2 py-1 rounded hover:bg-blue-700 transition-colors"
+                >
+                  참여
+                </button>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-700"></div>
+
+            <!-- 액션 버튼들 -->
+            <div class="p-2 space-y-1">
+              <button
+                @click="createRoom"
+                class="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left transition-colors"
+              >
+                <div
+                  class="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-4 h-4 text-gray-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <span class="text-sm text-gray-300">새 스터디룸 만들기</span>
+              </button>
+
+              <button
+                @click="browseRooms"
+                class="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left transition-colors"
+              >
+                <div
+                  class="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-4 h-4 text-gray-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <span class="text-sm text-gray-300">스터디룸 둘러보기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 현재 룸 정보 -->
       <div class="p-4 border-b border-gray-700 bg-gray-850">
         <div class="flex items-center gap-3 mb-3">
           <svg
@@ -16,12 +183,17 @@
           </svg>
           <div>
             <h2 class="text-base font-semibold text-gray-100">
-              coding-bootcamp
+              {{ currentRoom.name }}
             </h2>
             <div class="flex items-center gap-2 text-xs text-gray-400">
               <div class="w-2 h-2 bg-green-400 rounded-full"></div>
               <span>{{ onlineUsers.length }} developers online</span>
-              <button @click="openUserInviteModal()">+</button>
+              <button
+                @click="openUserInviteModal()"
+                class="ml-1 w-4 h-4 bg-gray-600 hover:bg-gray-500 rounded text-xs flex items-center justify-center transition-colors"
+              >
+                +
+              </button>
             </div>
           </div>
         </div>
@@ -496,16 +668,117 @@
         </div>
       </div>
     </div>
+
+    <!-- 룸 생성 모달 -->
+    <div
+      v-if="showCreateRoomModal"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+      @click="showCreateRoomModal = false"
+    >
+      <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full" @click.stop>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-white text-xl font-semibold">새 스터디룸 만들기</h3>
+          <button
+            @click="showCreateRoomModal = false"
+            class="text-gray-400 hover:text-gray-300"
+          >
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <form @submit.prevent="handleCreateRoom" class="space-y-4">
+          <div>
+            <label class="block text-gray-300 text-sm font-medium mb-2"
+              >룸 이름</label
+            >
+            <input
+              v-model="newRoom.name"
+              type="text"
+              class="w-full px-3 py-3 bg-gray-900 border border-gray-600 rounded text-white text-sm focus:border-blue-500 transition-colors"
+              placeholder="예: React 스터디"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-gray-300 text-sm font-medium mb-2"
+              >카테고리</label
+            >
+            <select
+              v-model="newRoom.category"
+              class="w-full px-3 py-3 bg-gray-900 border border-gray-600 rounded text-white text-sm focus:border-blue-500 transition-colors"
+            >
+              <option value="Frontend">Frontend</option>
+              <option value="Backend">Backend</option>
+              <option value="Mobile">Mobile</option>
+              <option value="AI/ML">AI/ML</option>
+              <option value="DevOps">DevOps</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-gray-300 text-sm font-medium mb-2"
+              >설명</label
+            >
+            <textarea
+              v-model="newRoom.description"
+              class="w-full px-3 py-3 bg-gray-900 border border-gray-600 rounded text-white text-sm focus:border-blue-500 transition-colors"
+              rows="3"
+              placeholder="스터디룸에 대한 간단한 설명을 입력하세요"
+            ></textarea>
+          </div>
+
+          <div class="flex gap-3">
+            <button
+              type="button"
+              @click="showCreateRoomModal = false"
+              class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded transition-colors"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
+            >
+              생성하기
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 성공 토스트 -->
+    <div
+      v-if="showToast"
+      class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2"
+    >
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      {{ toastMessage }}
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from "vue";
-import UserInviteModal from "../components/UserInviteModal.vue";
-import { useModalStore } from "@/stores/modalStore";
-import { api } from "@/axios.js";
 
-const modalStore = useModalStore();
+// 상태 관리
+const showRoomSelector = ref(false);
+const showCreateRoomModal = ref(false);
+const showToast = ref(false);
+const toastMessage = ref("");
 
 // 타이머 상태
 const currentTime = ref(0);
@@ -534,6 +807,79 @@ const currentUser = ref({
   name: "김철수",
   username: "kimcs_dev",
   status: "online",
+});
+
+// 현재 룸 정보
+const currentRoom = ref({
+  id: 1,
+  name: "coding-bootcamp",
+  members: 4,
+  category: "Frontend",
+  color: "#6366f1",
+  isActive: true,
+});
+
+// 내 룸들
+const myRooms = ref([
+  {
+    id: 1,
+    name: "coding-bootcamp",
+    members: 4,
+    category: "Frontend",
+    color: "#6366f1",
+    isActive: true,
+    hasNotification: false,
+  },
+  {
+    id: 2,
+    name: "react-masters",
+    members: 8,
+    category: "Frontend",
+    color: "#10b981",
+    isActive: true,
+    hasNotification: true,
+  },
+  {
+    id: 3,
+    name: "python-ai-study",
+    members: 6,
+    category: "AI/ML",
+    color: "#f59e0b",
+    isActive: false,
+    hasNotification: false,
+  },
+]);
+
+// 추천 룸들
+const recommendedRooms = ref([
+  {
+    id: 101,
+    name: "vue-beginners",
+    members: 12,
+    category: "Frontend",
+    color: "#8b5cf6",
+  },
+  {
+    id: 102,
+    name: "nodejs-backend",
+    members: 15,
+    category: "Backend",
+    color: "#ef4444",
+  },
+  {
+    id: 103,
+    name: "mobile-dev-crew",
+    members: 9,
+    category: "Mobile",
+    color: "#06b6d4",
+  },
+]);
+
+// 새 룸 생성 폼
+const newRoom = ref({
+  name: "",
+  category: "Frontend",
+  description: "",
 });
 
 // 접속 중인 개발자들
@@ -637,9 +983,72 @@ const formatTimestamp = (timestamp) => {
   });
 };
 
+// 토스트 표시
+const showToastMessage = (message) => {
+  toastMessage.value = message;
+  showToast.value = true;
+  setTimeout(() => {
+    showToast.value = false;
+  }, 3000);
+};
+
+// 룸 관련 함수들
+const switchRoom = (room) => {
+  currentRoom.value = room;
+  showRoomSelector.value = false;
+  showToastMessage(`${room.name} 룸으로 이동했습니다!`);
+  // 실제로는 API 호출하여 룸 데이터 로드
+};
+
+const joinRoom = (room) => {
+  // 실제로는 API 호출하여 룸 참여
+  myRooms.value.push({
+    ...room,
+    isActive: true,
+    hasNotification: false,
+  });
+  switchRoom(room);
+};
+
+const createRoom = () => {
+  showRoomSelector.value = false;
+  showCreateRoomModal.value = true;
+};
+
+const browseRooms = () => {
+  showRoomSelector.value = false;
+  // 실제로는 룸 브라우저 페이지로 이동
+  alert("스터디룸 브라우저로 이동합니다!");
+};
+
+const handleCreateRoom = () => {
+  if (newRoom.value.name.trim()) {
+    const room = {
+      id: Date.now(),
+      name: newRoom.value.name,
+      members: 1,
+      category: newRoom.value.category,
+      color: getUserColor(Date.now()),
+      isActive: true,
+      hasNotification: false,
+    };
+
+    myRooms.value.push(room);
+    switchRoom(room);
+
+    // 폼 리셋
+    newRoom.value = {
+      name: "",
+      category: "Frontend",
+      description: "",
+    };
+    showCreateRoomModal.value = false;
+  }
+};
+
 const openUserInviteModal = async () => {
-  const response = await api.$post("http://localhost:8080/roomusers/1/code");
-  console.log(response);
+  // 실제로는 API 호출
+  showToastMessage("초대 링크가 생성되었습니다!");
 };
 
 // 타이머 기능들
@@ -732,6 +1141,10 @@ const handleKeyPress = (event) => {
       event.preventDefault();
       resetTimer();
       break;
+    case "Escape":
+      showRoomSelector.value = false;
+      showCreateRoomModal.value = false;
+      break;
   }
 };
 
@@ -757,12 +1170,21 @@ const sendMessage = () => {
   }
 };
 
+// 외부 클릭 시 드롭다운 닫기
+const handleClickOutside = (event) => {
+  if (!event.target.closest(".relative")) {
+    showRoomSelector.value = false;
+  }
+};
+
 onMounted(() => {
   document.addEventListener("keydown", handleKeyPress);
+  document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
   document.removeEventListener("keydown", handleKeyPress);
+  document.removeEventListener("click", handleClickOutside);
   if (intervalId.value) {
     clearInterval(intervalId.value);
   }
@@ -781,3 +1203,89 @@ watch([dailyGoal, goalMinutes], () => {
   }
 });
 </script>
+
+<style scoped>
+/* 커스텀 배경색 */
+.bg-gray-750 {
+  background-color: #374151;
+}
+
+.bg-gray-850 {
+  background-color: #1f2937;
+}
+
+/* 애니메이션 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fixed.top-4.right-4 {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* 호버 효과 */
+.hover\:bg-green-700:hover {
+  background-color: #15803d;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: #1d4ed8;
+}
+
+.hover\:bg-gray-600:hover {
+  background-color: #4b5563;
+}
+
+.hover\:bg-gray-700:hover {
+  background-color: #374151;
+}
+
+/* 트랜지션 */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+.transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 회전 애니메이션 */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+</style>
