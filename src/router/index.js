@@ -5,6 +5,8 @@ import InvitationAcceptPage from "@/domains/invitation/pages/InvitationAcceptPag
 import LoginPage from "@/domains/auth/pages/LoginPage.vue";
 import SignUpPage from "@/domains/auth/pages/SignUpPage.vue";
 import ProjectDashBoardPage from "@/domains/project/pages/ProjectDashBoardPage.vue";
+import TeamDashBoardPage from "@/domains/team/pages/TeamDashBoardPage.vue";
+import TeamCreatePage from "@/domains/team/pages/TeamCreatePage.vue";
 
 const routes = [
   {
@@ -31,6 +33,16 @@ const routes = [
     path: "/project/main",
     component: ProjectDashBoardPage,
     name: "ProjectDashBoardPage",
+  },
+  {
+    path: "/team",
+    component: TeamDashBoardPage,
+    name: "TeamDashBoardPage",
+  },
+  {
+    path: "/team/create",
+    component: TeamCreatePage,
+    name: "TeamCreatePage",
   },
 ];
 
