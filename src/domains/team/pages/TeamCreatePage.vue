@@ -116,62 +116,8 @@
           </div>
         </div>
 
-        <!-- Step 3: Member Invitation -->
-        <div v-if="currentStep === 2" class="space-y-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">멤버 초대</h2>
-
-          <div class="space-y-4">
-            <div
-              v-for="(member, index) in formData.inviteMembers"
-              :key="index"
-              class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg"
-            >
-              <input
-                v-model="member.email"
-                type="email"
-                placeholder="이메일 주소"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <select
-                v-model="member.role"
-                class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="member">멤버</option>
-                <option value="admin">관리자</option>
-                <option value="viewer">뷰어</option>
-              </select>
-              <button
-                type="button"
-                @click="removeMember(index)"
-                class="p-2 text-red-600 hover:text-red-700"
-              >
-                <XIcon class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            @click="addMember"
-            class="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
-          >
-            <PlusIcon class="w-4 h-4" />
-            <span>멤버 추가</span>
-          </button>
-
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <div class="flex items-start space-x-3">
-              <InfoIcon class="w-5 h-5 text-blue-600 mt-0.5" />
-              <div class="text-sm text-blue-800">
-                <p class="font-medium">초대 안내</p>
-                <p>초대된 멤버들에게 이메일로 팀 참여 링크가 전송됩니다.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Step 4: GitHub Repository -->
-        <div v-if="currentStep === 3" class="space-y-6">
+        <div v-if="currentStep === 2" class="space-y-6">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">
             GitHub 레포지토리
           </h2>
@@ -257,7 +203,7 @@
         </div>
 
         <!-- Step 5: Template Selection -->
-        <div v-if="currentStep === 4" class="space-y-6">
+        <div v-if="currentStep === 3" class="space-y-6">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Bug 템플릿</h2>
 
           <div class="border rounded-lg p-6">
@@ -308,7 +254,7 @@
         </div>
 
         <!-- Step 6: Initial Settings -->
-        <div v-if="currentStep === 5" class="space-y-6">
+        <div v-if="currentStep === 4" class="space-y-6">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">초기 설정</h2>
 
           <div class="space-y-4">
@@ -442,7 +388,7 @@ watch(currentStep, async (newVal) => {
   if (newVal === 1) {
     const orgRes = await api.$get("/api/todo/org");
     console.log(orgRes);
-    organizations.value = orgRes;
+    organizations.value = orgRes.result;
   }
   console.log(organizations.value);
 });
@@ -452,7 +398,6 @@ const showNewOrgForm = ref(false);
 const steps = [
   { title: "기본 정보" },
   { title: "조직 연동" },
-  { title: "멤버 초대" },
   { title: "GitHub 설정" },
   { title: "템플릿 선택" },
   { title: "초기 설정" },
