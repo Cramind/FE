@@ -378,11 +378,11 @@ onMounted(async () => {
       api.$get("api/todo/reviews?owner=Cloudible&repo=GCP"),
       api.$get("api/todo?owner=Cloudible&repo=GCP"),
     ]);
-    issues.value = issuesRes;
-    prs.value = prsRes;
-    comments.value = commentsRes;
-    totalReviewStatsDto.value = reviewStatsRes.totalReviewStatsDto;
-    userReviewStatsDtoList.value = reviewStatsRes.userReviewStatsDtoList;
+    issues.value = issuesRes.result;
+    prs.value = prsRes.result;
+    comments.value = commentsRes.result;
+    totalReviewStatsDto.value = reviewStatsRes.result.totalReviewStatsDto;
+    userReviewStatsDtoList.value = reviewStatsRes.result.userReviewStatsDtoList;
   } catch (error) {
     console.error("❌ 이슈 가져오기 실패:", error);
   }
