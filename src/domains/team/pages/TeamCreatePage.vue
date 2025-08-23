@@ -376,13 +376,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, reactive } from "vue";
 import { api } from "@/axios";
 
 const currentStep = ref(0);
 const organizations = ref([]);
 const templateFiles = ref([]);
-const otherTemplate = ref("");
 
 watch(currentStep, async (newVal) => {
   if (newVal === 1) {
@@ -403,11 +402,10 @@ const steps = [
   { title: "초기 설정" },
 ];
 
-const formData = ref({
+const formData = reactive({
   teamName: "",
   teamDescription: "",
   selectedOrganization: "",
-  inviteMembers: [{ email: "" }],
   createGithubRepo: true,
   repoName: "",
   repoDescription: "",
@@ -422,6 +420,9 @@ const formData = ref({
   additionalNotes: "",
 });
 
+watch(formData, (newVal, oldVal) => {
+  console.log("변경됨:", oldVal, "→", newVal);
+});
 const newOrganization = ref({
   name: "",
   domain: "",
@@ -430,25 +431,18 @@ const newOrganization = ref({
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
-      return (
-        formData.value.teamName.trim() !== "" && formData.value.teamType !== ""
-      );
+      return formData.teamName.trim() !== "" && formData.teamType !== "";
     case 1:
-      return formData.value.selectedOrganization !== "";
+      return formData.selectedOrganization !== "";
     case 2:
-      return formData.value.inviteMembers.some(
-        (member) => member.email.trim() !== ""
-      );
-    case 3:
-      if (formData.value.createGithubRepo) {
+      if (formData.createGithubRepo) {
         return (
-          formData.value.repoName.trim() !== "" &&
-          formData.value.repoVisibility !== ""
+          formData.repoName.trim() !== "" && formData.repoVisibility !== ""
         );
       }
-      return formData.value.existingRepoUrl.trim() !== "";
+      return formData.existingRepoUrl.trim() !== "";
+    case 3:
     case 4:
-    case 5:
       return true;
     default:
       return false;
@@ -468,12 +462,12 @@ const previousStep = () => {
 };
 
 const addMember = () => {
-  formData.value.inviteMembers.push({ email: "", role: "member" });
+  formData.inviteMembers.push({ email: "", role: "member" });
 };
 
 const removeMember = (index) => {
-  if (formData.value.inviteMembers.length > 1) {
-    formData.value.inviteMembers.splice(index, 1);
+  if (formData.inviteMembers.length > 1) {
+    formData.inviteMembers.splice(index, 1);
   }
 };
 
@@ -485,14 +479,14 @@ const createOrganization = () => {
       members: 1,
     };
     organizations.value.push(newOrg);
-    formData.value.selectedOrganization = newOrg.id;
+    formData.selectedOrganization = newOrg.id;
     newOrganization.value = { name: "", domain: "" };
     showNewOrgForm.value = false;
   }
 };
 
 const selectOrganization = (org) => {
-  formData.value.selectedOrganization = org;
+  formData.selectedOrganization = org;
 };
 
 const handleBugTemplate = (event) => {
@@ -519,11 +513,19 @@ const handleFeatureTemplate = (event) => {
 const createTeam = async () => {
   alert("팀이 성공적으로 생성되었습니다!");
 
+  const teamCreateDto = {
+    teamName: formData.teamName?.trim() ?? "",
+    teamDescription: formData.teamDescription?.trim() ?? "",
+    selectedOrganization: formData.selectedOrganization?.trim() ?? "",
+  };
+
+  await api.$post("/api/team", teamCreateDto);
+
   console.log(templateFiles.value);
   await api.$post("/api/todo/org/repo", {
-    orgName: formData.value.selectedOrganization,
-    repoName: formData.value.repoName,
-    isPrivate: formData.value.repoVisibility,
+    orgName: formData.selectedOrganization,
+    repoName: formData.repoName,
+    isPrivate: formData.repoVisibility,
   });
 
   const form = new FormData();
@@ -536,8 +538,8 @@ const createTeam = async () => {
     metadataArray.push({
       category: template.category,
       fileName: template.file.name,
-      owner: formData.value.selectedOrganization,
-      repo: formData.value.repoName,
+      owner: formData.selectedOrganization,
+      repo: formData.repoName,
     });
   });
 
@@ -550,11 +552,8 @@ const createTeam = async () => {
   );
 
   await api.$post("/api/todo/org/repo/template", form);
-  await api.$post(
-    `/api/todo/org/invite/${formData.value.selectedOrganization}`,
-    {
-      email: formData.value.inviteMembers.map((m) => m.email),
-    }
-  );
+  await api.$post(`/api/todo/org/invite/${formData.selectedOrganization}`, {
+    email: formData.inviteMembers.map((m) => m.email),
+  });
 };
 </script>
