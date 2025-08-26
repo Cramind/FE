@@ -519,7 +519,7 @@ const createTeam = async () => {
     selectedOrganization: formData.selectedOrganization?.trim() ?? "",
   };
 
-  await api.$post("/api/team", teamCreateDto);
+  await api.$post("/api/team", teamCreateDto, { withCredentials: true });
 
   console.log(templateFiles.value);
   await api.$post("/api/todo/org/repo", {
