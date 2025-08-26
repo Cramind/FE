@@ -27,11 +27,10 @@ const onLogin = async ({ email, password }) => {
       { withCredentials: true }
     );
 
-    // 예시: 쿠키가 응답에서 자동 설정되었다면 바로 이동
-    router.push("/studyroom/1");
+    router.push("/team");
   } catch (e) {
     console.error("로그인 실패", e);
-    // toast 또는 상태로 에러 표시 (예: useToast 등 활용 가능)
+    showToastMessage("아이디나 비밀번호를 확인해주세요.");
   }
 };
 
