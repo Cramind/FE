@@ -409,6 +409,7 @@
 
 <script setup>
 import { ref, reactive, defineEmits, computed } from "vue";
+import { api } from "@/axios";
 
 const emit = defineEmits(["userinfo"]);
 
@@ -544,32 +545,36 @@ const showToastMessage = (message) => {
 
 // 회원가입 처리
 const handleSignup = async () => {
-  // 모든 필드 검증
+  console.log("handleSignup start"); // ✅ 함수 진입 확인용
+
   validateEmail();
   validatePassword();
   validateConfirmPassword();
+
+  console.log("isFormValid:", isFormValid.value);
 
   if (!isFormValid.value) return;
 
   isLoading.value = true;
 
   try {
+    console.log("before api call", signupForm);
+
     await api.$post("/users/signup", {
       email: signupForm.email,
       password: signupForm.password,
     });
 
-    showToastMessage("회원가입이 완료되었습니다!");
+    console.log("api call success");
 
-    // 실제로는 로그인 페이지로 리다이렉트 또는 자동 로그인
-    setTimeout(() => {
-      alert("환영합니다! 로그인 페이지로 이동합니다.");
-      router.push("/");
-    }, 1000);
+    showToastMessage("회원가입이 완료되었습니다!");
+    router.push("/");
   } catch (error) {
+    console.error("signup error:", error.response || error);
     showToastMessage("회원가입 중 오류가 발생했습니다");
   } finally {
     isLoading.value = false;
+    console.log("handleSignup end");
   }
 };
 
