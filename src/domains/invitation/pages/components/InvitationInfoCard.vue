@@ -10,7 +10,7 @@
       >
         <div class="absolute inset-0 bg-black/20"></div>
         <!-- 그룹 아바타 -->
-        <div class="absolute -bottom-6 left-6">
+        <!-- <div class="absolute -bottom-6 left-6">
           <div
             class="w-16 h-16 bg-blue-500 rounded-full border-4 border-gray-800 flex items-center justify-center"
           >
@@ -22,14 +22,14 @@
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- 온라인 상태 -->
       <div class="pt-8 px-6 pb-4">
         <div class="flex items-center gap-2 mb-2">
           <h1 class="text-white text-xl font-semibold">
-            {{ groupInfo.name }}
+            {{ teamInfo.teamName }}
           </h1>
           <svg
             class="w-4 h-4 text-gray-400"
@@ -47,10 +47,10 @@
         <div class="flex items-center gap-2 text-sm text-gray-300">
           <div class="flex items-center gap-1">
             <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span>{{ groupInfo.onlineMembers }} 명 접속 중</span>
+            <span>{{ teamInfo.activeMemberCnt }} 명 접속 중</span>
           </div>
           <span class="text-gray-500">•</span>
-          <span>{{ groupInfo.totalMembers }} 명 참여</span>
+          <span>{{ teamInfo.teamMemberCnt }} 명 참여</span>
         </div>
       </div>
     </div>
@@ -62,7 +62,7 @@
           <div
             class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold"
           >
-            {{ inviter.name.charAt(0) }}
+            {{ teamInfo.invitor.charAt(0) }}
           </div>
           <div
             class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-gray-800"
@@ -70,11 +70,8 @@
         </div>
         <div>
           <div class="text-gray-300 text-sm">
-            <span class="text-white font-medium">{{ inviter.name }}</span
+            <span class="text-white font-medium">{{ teamInfo.invitor }}</span
             >님이 초대했습니다
-          </div>
-          <div class="text-gray-400 text-xs">
-            {{ formatTime(inviter.invitedAt) }}
           </div>
         </div>
       </div>
@@ -87,39 +84,15 @@
         <div>
           <h3 class="text-gray-300 text-sm font-medium mb-2">그룹 소개</h3>
           <p class="text-gray-400 text-sm leading-relaxed">
-            {{ groupInfo.description }}
+            {{
+              teamInfo.teamDescription
+                ? teamInfo.teamDescription
+                : "팀 소개가 없습니다."
+            }}
           </p>
         </div>
-
-        <!-- 현재 활동 -->
-        <div>
-          <h3 class="text-gray-300 text-sm font-medium mb-3">현재 활동</h3>
-          <div class="space-y-2">
-            <div
-              v-for="activity in recentActivities"
-              :key="activity.id"
-              class="flex items-center gap-3 p-2 bg-gray-750 rounded"
-            >
-              <div
-                class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold"
-              >
-                {{ activity.user.charAt(0) }}
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="text-gray-300 text-sm">
-                  <span class="font-medium">{{ activity.user }}</span>
-                  <span class="text-gray-400 ml-1">{{ activity.action }}</span>
-                </div>
-                <div class="text-gray-500 text-xs">
-                  {{ activity.timeAgo }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- 그룹 통계 -->
-        <div>
+        <!-- <div>
           <h3 class="text-gray-300 text-sm font-medium mb-3">그룹 통계</h3>
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-gray-750 rounded p-3 text-center">
@@ -135,26 +108,26 @@
               <div class="text-gray-400 text-xs">일평균 학습</div>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- 참여 중인 멤버들 -->
         <div>
           <h3 class="text-gray-300 text-sm font-medium mb-3">참여 멤버</h3>
           <div class="flex -space-x-2">
             <div
-              v-for="member in groupInfo.members.slice(0, 8)"
-              :key="member.id"
+              v-for="(member, idx) in teamInfo.teamMembers.slice(0, 8)"
+              :key="idx"
               class="w-8 h-8 rounded-full border-2 border-gray-800 flex items-center justify-center text-white text-xs font-bold"
-              :style="{ backgroundColor: getMemberColor(member.id) }"
-              :title="member.name"
+              :style="{ backgroundColor: getMemberColor(idx) }"
+              :title="member"
             >
-              {{ member.name.charAt(0) }}
+              {{ member.charAt(0) }}
             </div>
             <div
-              v-if="groupInfo.members.length > 8"
+              v-if="teamInfo.teamMembers.length > 8"
               class="w-8 h-8 bg-gray-600 rounded-full border-2 border-gray-800 flex items-center justify-center text-gray-300 text-xs font-bold"
             >
-              +{{ groupInfo.members.length - 8 }}
+              +{{ teamInfo.teamMembers.length - 8 }}
             </div>
           </div>
         </div>
@@ -242,37 +215,25 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { api } from "@/axios";
 
-// 초대자 정보
-const inviter = ref({
-  name: "김민수",
-  invitedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
+const route = useRoute();
+
+const inviteCode = route.query.code;
+const teamInfo = ref({
+  teamName: "",
+  teamDescription: "",
+  teamMemberCnt: 0,
+  activeMemberCnt: 0,
+  invitor: "",
+  teamMembers: [],
 });
 
-// 그룹 정보
-const groupInfo = ref({
-  name: "토익 900점 도전 그룹",
-  description:
-    "3개월 안에 토익 900점을 목표로 하는 스터디 그룹입니다. 매일 2시간씩 함께 공부하며 서로 동기부여하고 있어요! 📚✨",
-  onlineMembers: 5,
-  totalMembers: 12,
-  totalStudyTime: "247시간",
-  averageDaily: "2.3시간",
-  members: [
-    { id: 1, name: "김민수" },
-    { id: 2, name: "이지은" },
-    { id: 3, name: "박준호" },
-    { id: 4, name: "최유진" },
-    { id: 5, name: "정수현" },
-    { id: 6, name: "한소영" },
-    { id: 7, name: "윤태호" },
-    { id: 8, name: "강미래" },
-    { id: 9, name: "조현우" },
-    { id: 10, name: "신예린" },
-    { id: 11, name: "오준석" },
-    { id: 12, name: "임하늘" },
-  ],
+onMounted(async () => {
+  const teamInfoRes = await api.$get(`/api/team/info/${inviteCode}`);
+  teamInfo.value = teamInfoRes.result;
 });
 
 // 최근 활동
