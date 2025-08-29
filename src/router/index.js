@@ -15,11 +15,6 @@ const routes = [
     name: "LoginPage",
   },
   {
-    path: "/studyroom/:studyroomId",
-    component: StudyRoomPage,
-    name: "StudyRoomPage",
-  },
-  {
     path: "/invite/:inviteCode",
     component: InvitationAcceptPage,
     name: "InvitationAcceptPage",
@@ -35,7 +30,7 @@ const routes = [
     name: "ProjectDashBoardPage",
   },
   {
-    path: "/team",
+    path: "/team/:teamId",
     component: TeamDashBoardPage,
     name: "TeamDashBoardPage",
   },
