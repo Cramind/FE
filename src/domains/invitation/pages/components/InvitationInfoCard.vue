@@ -160,14 +160,6 @@
           ></div>
           {{ isLoading ? "참여 중..." : "그룹 참여하기" }}
         </button>
-
-        <button
-          @click="declineInvite"
-          :disabled="isLoading"
-          class="w-full bg-transparent hover:bg-gray-600 disabled:opacity-50 text-gray-300 font-medium py-3 px-4 rounded border border-gray-600 transition-colors"
-        >
-          나중에 하기
-        </button>
       </div>
 
       <div class="mt-4 text-center">
@@ -175,51 +167,15 @@
       </div>
     </div>
   </div>
-
-  <!-- 성공 모달 -->
-  <div
-    v-if="showSuccessModal"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-    @click="closeSuccessModal"
-  >
-    <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full" @click.stop>
-      <div class="text-center">
-        <div
-          class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4"
-        >
-          <svg
-            class="w-8 h-8 text-white"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </div>
-        <h3 class="text-white text-lg font-semibold mb-2">참여 완료!</h3>
-        <p class="text-gray-400 text-sm mb-4">
-          {{ groupInfo.name }}에 성공적으로 참여했습니다.
-        </p>
-        <button
-          @click="goToStudyRoom"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
-        >
-          스터디룸 입장하기
-        </button>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { api } from "@/axios";
 
 const route = useRoute();
+const router = useRouter();
 
 const inviteCode = route.query.code;
 const teamInfo = ref({
@@ -231,32 +187,12 @@ const teamInfo = ref({
   teamMembers: [],
 });
 
+const isLoading = ref(false);
+
 onMounted(async () => {
   const teamInfoRes = await api.$get(`/api/team/info/${inviteCode}`);
   teamInfo.value = teamInfoRes.result;
 });
-
-// 최근 활동
-const recentActivities = ref([
-  {
-    id: 1,
-    user: "이지은",
-    action: "토익 모의고사 완료",
-    timeAgo: "15분 전",
-  },
-  {
-    id: 2,
-    user: "박준호",
-    action: "단어 암기 100개 달성",
-    timeAgo: "32분 전",
-  },
-  {
-    id: 3,
-    user: "최유진",
-    action: "2시간 집중 학습 완료",
-    timeAgo: "1시간 전",
-  },
-]);
 
 // 멤버 색상 생성
 const getMemberColor = (id) => {
@@ -296,31 +232,12 @@ const formatTime = (date) => {
 
 // 초대 수락
 const acceptInvite = async () => {
-  isLoading.value = true;
-
-  // 실제로는 API 호출
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  isLoading.value = false;
-  showSuccessModal.value = true;
-};
-
-// 초대 거절
-const declineInvite = () => {
-  // 실제로는 이전 페이지로 이동하거나 홈으로 리다이렉트
-  alert("초대를 거절했습니다.");
-};
-
-// 성공 모달 닫기
-const closeSuccessModal = () => {
-  showSuccessModal.value = false;
-};
-
-// 스터디룸으로 이동
-const goToStudyRoom = () => {
-  // 실제로는 스터디룸 페이지로 라우팅
-  alert("스터디룸으로 이동합니다!");
-  showSuccessModal.value = false;
+  try {
+    const res = await api.$post(`/api/teammembers/${inviteCode}`, null, {
+      withCredentials: true,
+    });
+    router.push(`/team/${res.result}`);
+  } catch {}
 };
 </script>
 
