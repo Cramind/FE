@@ -109,36 +109,20 @@
                 <h4 class="font-medium text-gray-900 dark:text-white text-sm">
                   {{ task.title }}
                 </h4>
-                <span
-                  :class="getPriorityColor(task.priority)"
-                  class="text-xs px-2 py-1 rounded-full font-medium"
-                >
-                  {{ task.priority }}
-                </span>
               </div>
-
-              <p
-                class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2"
-              >
-                {{ task.description }}
-              </p>
 
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <img
-                    :src="task.assignee.avatar"
-                    :alt="task.assignee.name"
+                    :src="task.user.avatar_url"
                     class="w-6 h-6 rounded-full"
                   />
                   <span class="text-xs text-gray-600 dark:text-gray-400">{{
-                    task.assignee.name
+                    task.user.login
                   }}</span>
                 </div>
-                <span class="text-xs text-gray-500 dark:text-gray-500">{{
-                  task.dueDate
-                }}</span>
               </div>
-
+              <!-- 
               <div class="flex flex-wrap gap-1 mt-2">
                 <span
                   v-for="tag in task.tags"
@@ -147,7 +131,7 @@
                 >
                   {{ tag }}
                 </span>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -279,12 +263,20 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
+import { api } from "@/axios";
 
 const isDarkMode = ref(false);
 const showAddTask = ref(false);
 const editingTask = ref(null);
 const draggedTask = ref(null);
 const newColumnStatus = ref("todo");
+
+const tasks = ref([]);
+
+onMounted(async () => {
+  const res = await api.$get("/api/todo/kanban/24");
+  tasks.value = res.result.items;
+});
 
 const taskForm = reactive({
   title: "",
@@ -297,9 +289,9 @@ const taskForm = reactive({
 
 const columns = [
   { id: "todo", title: "할 일", color: "bg-gray-400" },
-  { id: "inprogress", title: "진행 중", color: "bg-blue-400" },
+  { id: "open", title: "진행 중", color: "bg-blue-400" },
   { id: "review", title: "검토", color: "bg-yellow-400" },
-  { id: "done", title: "완료", color: "bg-green-400" },
+  { id: "closed", title: "완료", color: "bg-green-400" },
 ];
 
 const teamMembers = [
@@ -308,49 +300,6 @@ const teamMembers = [
   { id: 3, name: "박매니저", avatar: "/placeholder.svg?height=32&width=32" },
   { id: 4, name: "최기획", avatar: "/placeholder.svg?height=32&width=32" },
 ];
-
-const tasks = ref([
-  {
-    id: 1,
-    title: "로그인 페이지 디자인",
-    description: "사용자 로그인 페이지의 UI/UX 디자인을 완성합니다.",
-    status: "todo",
-    priority: "High",
-    assignee: teamMembers[1],
-    dueDate: "2024-01-15",
-    tags: ["디자인", "UI/UX"],
-  },
-  {
-    id: 2,
-    title: "API 엔드포인트 개발",
-    description: "사용자 인증을 위한 REST API 엔드포인트를 개발합니다.",
-    status: "inprogress",
-    priority: "High",
-    assignee: teamMembers[0],
-    dueDate: "2024-01-20",
-    tags: ["백엔드", "API"],
-  },
-  {
-    id: 3,
-    title: "데이터베이스 스키마 설계",
-    description: "사용자 정보를 저장할 데이터베이스 스키마를 설계합니다.",
-    status: "review",
-    priority: "Medium",
-    assignee: teamMembers[0],
-    dueDate: "2024-01-10",
-    tags: ["데이터베이스", "설계"],
-  },
-  {
-    id: 4,
-    title: "프로젝트 요구사항 정리",
-    description: "클라이언트와의 미팅을 통해 프로젝트 요구사항을 정리합니다.",
-    status: "done",
-    priority: "Medium",
-    assignee: teamMembers[2],
-    dueDate: "2024-01-05",
-    tags: ["기획", "요구사항"],
-  },
-]);
 
 // === Lifecycle ===
 onMounted(() => {
@@ -373,7 +322,9 @@ function toggleDarkMode() {
 }
 
 function getTasksByStatus(status) {
-  return tasks.value.filter((task) => task.status === status);
+  console.log(status);
+  console.log(tasks.value.filter((task) => task.state === status));
+  return tasks.value.filter((task) => task.state === status);
 }
 
 function getPriorityColor(priority) {
