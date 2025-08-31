@@ -80,6 +80,30 @@
             </svg>
             문서
           </button>
+          <button
+            @click="activeSection = 'kanban'"
+            :class="[
+              'w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+              activeSection === 'kanban'
+                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+            ]"
+          >
+            <svg
+              class="w-5 h-5 mr-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+            칸반
+          </button>
         </div>
       </nav>
 
@@ -131,14 +155,10 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ activeSection === "dashboard" ? "팀 대시보드" : "문서" }}
+              {{ activeTitle }}
             </h1>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {{
-                activeSection === "dashboard"
-                  ? "팀의 프로젝트 현황을 한눈에 확인하세요"
-                  : "프로젝트 문서와 가이드를 관리하세요"
-              }}
+              {{ activeDesc }}
             </p>
           </div>
 
@@ -498,7 +518,7 @@
       </main>
 
       <!-- Documentation Content -->
-      <main v-else class="p-6">
+      <main v-if="activeSection === 'docs'" class="p-6">
         <div
           class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
         >
@@ -527,6 +547,9 @@
           </div>
         </div>
       </main>
+      <main v-if="activeSection === 'kanban'">
+        <KanvanBoard />
+      </main>
     </div>
   </div>
 </template>
@@ -534,6 +557,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
 import { api } from "@/axios";
+import KanvanBoard from "../components/KanbanBoard.vue";
 
 // Theme management
 const isDark = ref(false);
@@ -542,8 +566,26 @@ const toggleTheme = () => {
   isDark.value = !isDark.value;
 };
 
+const TITLES = {
+  dashboard: "팀 대시보드",
+  docs: "문서",
+  kanban: "칸반 보드",
+};
+
+const DESCS = {
+  dashboard: "팀의 프로젝트 현황을 한눈에 확인하세요",
+  docs: "프로젝트 문서와 가이드를 관리하세요",
+  kanban: "작업을 칸반 보드에서 시각화하고 우선순위를 관리하세요",
+};
+
 // Navigation
-const activeSection = ref("dashboard");
+const activeSection = ref("");
+const activeTitle = computed(
+  () => TITLES[activeSection.value] ?? TITLES["dashboard"]
+);
+const activeDesc = computed(
+  () => DESCS[activeSection.value] ?? DESCS["dashboard"]
+);
 
 // Team management
 const selectedTeam = ref("frontend");
@@ -591,7 +633,6 @@ onMounted(async () => {
 });
 
 const refreshEvents = () => {
-  // 실제로는 API 호출을 통해 데이터를 새로고침
   console.log("이벤트 새로고침");
 };
 
