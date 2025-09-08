@@ -1,8 +1,32 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 module.exports = {
-  content: ["index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
+  darkMode: "class",
+  content: ["./index.html", "./src/**/*.{vue,js,ts}"],
   theme: {
-    extend: {},
+    extend: {
+      typography: ({ theme }) => ({
+        // 라이트 모드 기본
+        DEFAULT: {
+          css: {
+            "--tw-prose-body": theme("colors.slate.700"),
+            "--tw-prose-headings": theme("colors.slate.900"),
+            "--tw-prose-links": theme("colors.sky.600"),
+            "--tw-prose-code": theme("colors.sky.700"),
+            "--tw-prose-pre-bg": theme("colors.slate.100"),
+          },
+        },
+        // 다크 모드 반전
+        invert: {
+          css: {
+            "--tw-prose-body": theme("colors.slate.200"),
+            "--tw-prose-headings": theme("colors.slate.50"),
+            "--tw-prose-links": theme("colors.sky.300"),
+            "--tw-prose-code": theme("colors.sky.300"),
+            "--tw-prose-pre-bg": theme("colors.slate.900"),
+          },
+        },
+      }),
+    },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
 };

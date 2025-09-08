@@ -1,8 +1,5 @@
 <template>
-  <div
-    :class="isDark ? 'dark' : ''"
-    class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors"
-  >
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
     <!-- Sidebar -->
     <div
       class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm"
@@ -522,29 +519,7 @@
         <div
           class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
         >
-          <div class="p-8 text-center">
-            <svg
-              class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <h3
-              class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
-            >
-              문서 섹션
-            </h3>
-            <p class="text-gray-600 dark:text-gray-400">
-              프로젝트 문서와 가이드가 여기에 표시됩니다.
-            </p>
-          </div>
+          <DocumentBoard />
         </div>
       </main>
       <main v-if="activeSection === 'kanban'">
@@ -558,6 +533,7 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import { api } from "@/axios";
 import KanvanBoard from "../components/KanbanBoard.vue";
+import DocumentBoard from "../components/DocumentBoard.vue";
 
 // Theme management
 const isDark = ref(false);
