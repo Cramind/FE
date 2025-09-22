@@ -31,6 +31,18 @@
     <!-- 회원가입 폼 -->
     <div class="px-8 pb-8">
       <form @submit.prevent="handleSignup" class="space-y-4">
+        <div>
+          <label class="block text-gray-300 text-sm font-medium mb-2">
+            이름 <span class="text-red-400">*</span>
+          </label>
+          <input
+            v-model="signupForm.name"
+            type="name"
+            :class="[
+              'w-full px-3 py-3 bg-gray-900 border rounded text-white text-sm transition-colors',
+            ]"
+          />
+        </div>
         <!-- 이메일 입력 -->
         <div>
           <label class="block text-gray-300 text-sm font-medium mb-2">
@@ -423,6 +435,7 @@ const toastMessage = ref("");
 
 // 폼 데이터
 const signupForm = reactive({
+  name: "",
   email: "",
   password: "",
   confirmPassword: "",
@@ -523,6 +536,7 @@ const validateConfirmPassword = () => {
 // 폼 유효성 검사
 const isFormValid = computed(() => {
   return (
+    signupForm.name &&
     signupForm.email &&
     signupForm.password &&
     signupForm.confirmPassword &&
@@ -561,6 +575,7 @@ const handleSignup = async () => {
     console.log("before api call", signupForm);
 
     await api.$post("/users/signup", {
+      name: signupForm.name,
       email: signupForm.email,
       password: signupForm.password,
     });
